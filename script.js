@@ -612,7 +612,7 @@ function greedyTravelingSalesman2(startingPoints) {
 				},
 				msgs: `Found a better path with total distance: ${totalDistance}<br>Path: ${path.join(
 					" -> "
-				)}`,
+				)}<br><br>Last best path: ${bestCost}<br>Path: ${bestPath.join(" -> ")}`,
 			});
 
 			bestVisitedPoints = [...visitedPoints];
