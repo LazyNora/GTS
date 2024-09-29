@@ -45,8 +45,12 @@ addPointButton.addEventListener("click", function () {
 	addPointButton.disabled = true;
 	editGraph.on("click", function (event) {
 		const [x, y] = d3.pointer(event);
-		const maxIndex = edit_points.length > 0 ? Math.max(...edit_points.map((p) => p.index)) : -1;
-		const newPoint = { index: maxIndex + 1, x, y };
+		const indices = edit_points.map((p) => p.index);
+		let newIndex = 0;
+		while (indices.includes(newIndex)) {
+			newIndex++;
+		}
+		const newPoint = { index: newIndex, x, y };
 		edit_points.push(newPoint);
 		drawEditablePoint(newPoint);
 		editGraph.on("click", null); // Remove click listener after adding point
