@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Greedy Traveling Saleman</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+			rel="stylesheet" />
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+			integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+			crossorigin="anonymous"
+			referrerpolicy="no-referrer" />
+		<script src="https://d3js.org/d3.v7.min.js"></script>
+		<link rel="stylesheet" href="./style.css" />
+		<style>
+			.point-label,
+			.edge-label {
+				-webkit-touch-callout: none; /* iOS Safari */
+				-webkit-user-select: none; /* Safari */
+				-khtml-user-select: none; /* Konqueror HTML */
+				-moz-user-select: none; /* Firefox */
+				-ms-user-select: none; /* Internet Explorer/Edge */
+				user-select: none;
+			}
+		</style>
+	</head>
+	<body>
+		<p id="message"></p>
+		<div id="GTS">
+			<svg id="graph" width="800" height="800" style="border: 1px solid black"></svg>
+			<div class="field-container">
+				<div class="fields">
+					<div class="gts1">
+						<div class="form-field">
+							<input
+								type="number"
+								class="form__input"
+								placeholder=""
+								name="start-point"
+								id="start-point"
+								required />
+							<label for="start-point" class="form__label">Starting point</label>
+							<span class="form__msg"></span>
+						</div>
+					</div>
+					<div class="gts2" style="display: none">
+						<div class="form-field">
+							<input
+								type="number"
+								class="form__input"
+								placeholder=""
+								name="number-of-start-points"
+								id="number-of-start-points"
+								required />
+							<label for="number-of-start-points" class="form__label"
+								>Number of starting points</label
+							>
+							<span class="form__msg"></span>
+						</div>
+						<div class="start-points"></div>
+					</div>
+					<div class="form-field">
+						<button class="btn" id="solve-button">Solve</button>
+					</div>
+				</div>
+				<div class="log">
+					<div class="log-header">
+						<h2>Log</h2>
+					</div>
+					<div class="log-content"></div>
+				</div>
+			</div>
+		</div>
+		<div class="nav">
+			<div class="left">
+				<button class="btn tooltip-container" id="to-start">
+					<i class="fa-solid fa-backward-fast"></i>
+					<div class="tool-tip">To Start</div>
+				</button>
+				<button class="btn tooltip-container" id="previous-button">
+					<i class="fa-solid fa-backward"></i>
+					<div class="tool-tip">Previous</div>
+				</button>
+				<button class="btn tooltip-container" id="play-button">
+					<i class="fa-solid fa-play"></i>
+					<div class="tool-tip">Play</div>
+				</button>
+				<button class="btn tooltip-container" id="pause-button" style="display: none">
+					<i class="fa-solid fa-pause"></i>
+					<div class="tool-tip">Pause</div>
+				</button>
+				<button class="btn tooltip-container" id="next-button">
+					<i class="fa-solid fa-forward"></i>
+					<div class="tool-tip">Next</div>
+				</button>
+				<button class="btn tooltip-container" id="to-end">
+					<i class="fa-solid fa-forward-fast"></i>
+					<div class="tool-tip">To End</div>
+				</button>
+			</div>
+			<div class="right">
+				<div class="tooltip-container">
+					<input type="range" id="speed-slider" min="1" max="6" value="2" step="1" />
+					<div class="tool-tip">Speed</div>
+				</div>
+				<button class="btn tooltip-container" id="edit">
+					<i class="fa-solid fa-pen-to-square"></i>
+					<div class="tool-tip">Edit</div>
+				</button>
+				<div class="custom-select">
+					<select id="options-select" class="select-input">
+						<option value="GTS1" selected>GTS1</option>
+						<option value="GTS2">GTS2</option>
+					</select>
+					<button class="select-selected">
+						<span class="selected-value">GTS1</span>
+						<div class="chevron">
+							<i class="fa-solid fa-chevron-up"></i>
+						</div>
+					</button>
+					<div class="select-items"></div>
+				</div>
+			</div>
+		</div>
+		<div class="modal" id="modal">
+			<div class="modal-content">
+				<span id="close" class="close">&times;</span>
+				<h2>Greedy Traveling Salesman</h2>
+				<div style="display: flex; justify-content: center; align-items: center; margin: 0.5rem">
+					<svg id="edit-graph" width="800" height="800" style="border: 1px solid black"></svg>
+				</div>
+				<div style="display: flex; align-items: center; justify-content: center">
+					<button class="btn" id="cancel">Cancel</button>
+					<button class="btn" id="clear">Clear</button>
+					<button class="btn" id="save">Save</button>
+					<button class="btn" id="add-point">Add Point</button>
+					<button class="btn" id="delete-point" disabled>Delete Point</button>
+				</div>
+			</div>
+		</div>
+		<script>
+			const select = document.querySelector(".custom-select");
+			const selected = select.querySelector(".select-selected");
+			const items = select.querySelector(".select-items");
+			const options = select.querySelector(".select-input").children;
+			selected.addEventListener("click", () => {
+				const isActive = select.classList.contains("active");
+				if (isActive) {
+					select.classList.remove("active");
+				} else {
+					select.classList.add("active");
+				}
+			});
+			for (let i = 0; i < options.length; i++) {
+				const option = options[i];
+				const button = document.createElement("button");
+				button.textContent = option.textContent;
+				button.addEventListener("click", () => {
+					selected.querySelector(".selected-value").textContent = option.textContent;
+					select.classList.remove("active");
+					select.querySelector(".select-input").value = option.value;
+					const event = new Event("change");
+					select.querySelector(".select-input").dispatchEvent(event);
+				});
+				items.appendChild(button);
+			}
+			document.addEventListener("click", (e) => {
+				if (!select.contains(e.target)) {
+					select.classList.remove("active");
+				}
+			});
+			select.querySelector(".select-input").value = "GTS1";
+		</script>
+		<script src="./edit-graph.js"></script>
+		<script src="./script.js"></script>
+	</body>
+</html>
