@@ -600,9 +600,6 @@ function greedyTravelingSalesman2(startingPoints) {
 
 		// Cập nhật chu trình tốt nhất
 		if (totalDistance < bestCost) {
-			bestPath = path;
-			bestCost = totalDistance;
-
 			steps.push({
 				highlights: {
 					highlightedPoints: [],
@@ -614,6 +611,9 @@ function greedyTravelingSalesman2(startingPoints) {
 					" -> "
 				)}<br><br>Last best path: ${bestCost}<br>Path: ${bestPath.join(" -> ")}`,
 			});
+
+			bestPath = path;
+			bestCost = totalDistance;
 
 			bestVisitedPoints = [...visitedPoints];
 			bestVisitedEdges = [...visitedEdges];
